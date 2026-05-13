@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#0f172a" />
+<title>Mon École</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📚%3C/text%3E%3C/svg%3E" />
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #f1f5f9; min-height: 100vh; overflow-x: hidden; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, select, textarea { font-family: inherit; }
+.app { max-width: 800px; margin: 0 auto; padding: 24px 20px 100px; min-height: 100vh; }
+header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.logo { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+.logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.user-info { font-size: 13px; color: #94a3b8; text-align: right; }
+.user-info strong { color: #f1f5f9; display: block; }
+.admin-badge { display: inline-block; background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; margin-left: 6px; }
+nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.08); padding: 8px 0; z-index: 100; }
+.nav-inner { max-width: 800px; margin: 0 auto; display: grid; gap: 4px; padding: 0 8px; }
+body:not(.is-admin) .nav-inner { grid-template-columns: repeat(6, 1fr); }
+.is-admin .nav-inner { grid-template-columns: repeat(7, 1fr); }
+.nav-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; border-radius: 10px; font-size: 9px; color: #94a3b8; }
+.nav-btn.active { color: #a78bfa; background: rgba(139, 92, 246, 0.15); }
+.nav-btn .icon { font-size: 18px; }
+.nav-btn.admin-only { display: none; }
+.is-admin .nav-btn.admin-only { display: flex; }
+section { display: none; }
+section.active { display: block; }
+h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+.subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 24px; }
+.card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+.card h3 { font-size: 15px; font-weight: 600; margin-bottom: 14px; color: #cbd5e1; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; }
+.stat-label { font-size: 12px; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; }
+.stat-value { font-size: 28px; font-weight: 700; }
+.stat-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+.stat.featured { background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)); border-color: rgba(139,92,246,0.3); }
+.stat.featured .stat-value { color: #c4b5fd; }
+.stat.admin { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.15)); }
+.form-grid { display: grid; gap: 10px; margin-bottom: 14px; }
+.form-row { display: grid; gap: 10px; }
+.form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+.form-row.cols-4 { grid-template-columns: 2fr 1fr 1fr auto; }
+input, select, textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 11px 14px; color: #f1f5f9; font-size: 14px; outline: none; }
+textarea { resize: vertical; min-height: 80px; }
+input:focus, select:focus, textarea:focus { border-color: #8b5cf6; }
+input::placeholder, textarea::placeholder { color: #64748b; }
+.btn { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 11px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; }
+.btn-icon { padding: 11px 14px; min-width: 44px; }
+.btn-secondary { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); }
+.btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.btn-success { background: linear-gradient(135deg, #10b981, #059669); }
+.btn-full { width: 100%; }
+.btn-small { padding: 6px 12px; font-size: 12px; }
+.list { display: flex; flex-direction: column; gap: 8px; }
+.item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+.item-main { flex: 1; min-width: 0; }
+.item-title { font-size: 15px; font-weight: 500; margin-bottom: 2px; word-wrap: break-word; }
+.item-meta { font-size: 12px; color: #94a3b8; display: flex; gap: 8px; flex-wrap: wrap; }
+.item-body { font-size: 13px; color: #cbd5e1; margin-top: 6px; line-height: 1.5; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; background: rgba(139,92,246,0.2); color: #c4b5fd; }
+.badge.green { background: rgba(34,197,94,0.2); color: #86efac; }
+.badge.red { background: rgba(239,68,68,0.2); color: #fca5a5; }
+.badge.amber { background: rgba(245,158,11,0.2); color: #fcd34d; }
+.badge.gold { background: linear-gradient(135deg, rgba(245,158,11,0.3), rgba(239,68,68,0.3)); color: #fcd34d; }
+.grade-pill { font-weight: 700; font-size: 16px; padding: 6px 12px; border-radius: 10px; min-width: 60px; text-align: center; }
+.grade-good { background: rgba(34,197,94,0.15); color: #86efac; }
+.grade-ok { background: rgba(245,158,11,0.15); color: #fcd34d; }
+.grade-bad { background: rgba(239,68,68,0.15); color: #fca5a5; }
+.checkbox { width: 22px; height: 22px; border-radius: 7px; border: 2px solid #64748b; background: transparent; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.checkbox.checked { background: #8b5cf6; border-color: #8b5cf6; }
+.checkbox.checked::after { content: "✓"; color: white; font-size: 14px; font-weight: bold; }
+.done .item-title { text-decoration: line-through; color: #64748b; }
+.icon-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #64748b; flex-shrink: 0; }
+.empty { text-align: center; padding: 40px 20px; color: #64748b; font-size: 14px; }
+.empty-icon { font-size: 40px; margin-bottom: 12px; display: block; opacity: 0.4; }
+.edt-table { width: 100%; border-collapse: separate; border-spacing: 4px; font-size: 12px; }
+.edt-table th, .edt-table td { padding: 8px 6px; text-align: center; background: rgba(255,255,255,0.04); border-radius: 8px; }
+.edt-table th { color: #94a3b8; font-size: 11px; }
+.edt-table td.has-class { background: rgba(139,92,246,0.18); color: #e9d5ff; font-weight: 500; cursor: pointer; }
+.edt-table td.has-class small { display: block; font-size: 10px; opacity: 0.8; }
+.edt-time { color: #64748b; font-size: 11px; }
+.poll-option { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; margin-bottom: 6px; cursor: pointer; position: relative; overflow: hidden; }
+.poll-option.voted { border-color: rgba(139,92,246,0.4); background: rgba(139,92,246,0.1); }
+.poll-bar { position: absolute; top: 0; left: 0; bottom: 0; background: rgba(139,92,246,0.15); z-index: 0; }
+.poll-option > * { position: relative; z-index: 1; }
+.poll-text { flex: 1; font-size: 14px; }
+.poll-stats { font-size: 12px; color: #94a3b8; }
+.auth-screen { position: fixed; inset: 0; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 24px; }
+.auth-screen.show { display: flex; }
+.auth-box { max-width: 380px; width: 100%; }
+.auth-logo { text-align: center; margin-bottom: 32px; }
+.auth-logo .logo-icon { width: 60px; height: 60px; font-size: 32px; border-radius: 16px; margin: 0 auto 12px; }
+.auth-logo h1 { font-size: 28px; font-weight: 700; }
+.auth-logo p { color: #94a3b8; font-size: 14px; margin-top: 4px; }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: rgba(255,255,255,0.04); padding: 4px; border-radius: 10px; margin-bottom: 16px; }
+.auth-tab { padding: 10px; border-radius: 8px; font-size: 13px; color: #94a3b8; }
+.auth-tab.active { background: rgba(139,92,246,0.2); color: #c4b5fd; }
+.auth-tab-content { display: none; }
+.auth-tab-content.active { display: block; }
+.danger-zone { border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); border-radius: 12px; padding: 16px; margin-top: 24px; }
+.danger-zone h4 { color: #fca5a5; font-size: 14px; margin-bottom: 8px; }
+.small { font-size: 12px; color: #94a3b8; }
+.floating-btns { position: fixed; top: 16px; right: 16px; display: flex; gap: 8px; z-index: 50; }
+.floating-btns button { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: rgba(15,23,42,0.95); border: 1px solid rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 12px; font-size: 14px; z-index: 500; display: none; }
+.toast.show { display: block; }
+.toast.error { border-color: rgba(239,68,68,0.4); color: #fca5a5; }
+.toast.success { border-color: rgba(34,197,94,0.4); color: #86efac; }
+@media (max-width: 540px) { .app { padding: 16px 14px 100px; } .form-row.cols-4 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="auth-screen show" id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="logo-icon">📚</div>
+      <h1>Mon École</h1>
+      <p>Connecte-toi pour accéder à ton espace</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Connexion</button>
+      <button class="auth-tab" data-tab="signup">Inscription</button>
+    </div>
+    <div class="auth-tab-content active" id="auth-login">
+      <div class="form-grid">
+        <input type="email" id="login-email" placeholder="Email" autocomplete="email" />
+        <input type="password" id="login-pwd" placeholder="Mot de passe" autocomplete="current-password" />
+        <button class="btn btn-full" id="btn-login">Se connecter</button>
+      </div>
+    </div>
+    <div class="auth-tab-content" id="auth-signup">
+      <div class="form-grid">
+        <input type="text" id="signup-name" placeholder="Prénom" />
+        <input type="email" id="signup-email" placeholder="Email" autocomplete="email" />
+        <input type="password" id="signup-pwd" placeholder="Mot de passe (6 car. min)" autocomplete="new-password" />
+        <input type="text" id="signup-invite" placeholder="Code d'invitation (optionnel)" />
+        <button class="btn btn-full" id="btn-signup">Créer mon compte</button>
+      </div>
+      <p class="small" style="text-align:center; margin-top: 12px;">✨ Vraies données stockées dans Supabase</p>
+    </div>
+  </div>
+</div>
+
+<div class="floating-btns" id="float-btns" style="display:none;">
+  <button onclick="showPage('settings')" title="Réglages">⚙️</button>
+  <button onclick="logout()" title="Déconnexion">🚪</button>
+</div>
+
+<div class="app" id="main-app" style="display:none;">
+  <header>
+    <div class="logo"><div class="logo-icon">📚</div><div>Mon École</div></div>
+    <div class="user-info">
+      <strong id="user-name">—<span id="admin-tag"></span></strong>
+      <span id="user-class">—</span>
+    </div>
+  </header>
+
+  <section id="page-home" class="active">
+    <h2>Bonjour <span id="greeting-name">👋</span></h2>
+    <p class="subtitle">Aperçu de ta journée.</p>
+    <div class="stats">
+      <div class="stat featured"><div class="stat-label">Ma moyenne</div><div class="stat-value" id="home-moy">—</div><div class="stat-sub" id="home-moy-sub">aucune note</div></div>
+      <div class="stat"><div class="stat-label">Devoirs</div><div class="stat-value" id="home-dev">0</div><div class="stat-sub">à faire</div></div>
+      <div class="stat"><div class="stat-label">Cours auj.</div><div class="stat-value" id="home-cours">0</div><div class="stat-sub" id="home-jour">—</div></div>
+    </div>
+    <div class="card"><h3>📢 Annonces</h3><div id="home-announces" class="list"></div></div>
+    <div class="card"><h3>📅 Aujourd'hui</h3><div id="home-edt-today" class="list"></div></div>
+    <div class="card"><h3>📌 Prochains devoirs</h3><div id="home-prochains" class="list"></div></div>
+  </section>
+
+  <section id="page-notes">
+    <h2>Mes notes</h2>
+    <p class="subtitle">🔒 Privées — visibles uniquement par toi.</p>
+    <div class="stats">
+      <div class="stat featured"><div class="stat-label">Moyenne</div><div class="stat-value" id="notes-moy">—</div><div class="stat-sub" id="notes-nb">0 note</div></div>
+    </div>
+    <div class="card">
+      <h3>➕ Ajouter une note</h3>
+      <div class="form-grid">
+        <div class="form-row cols-4">
+          <input type="text" id="note-mat" placeholder="Matière" />
+          <input type="number" id="note-val" placeholder="Note /20" min="0" max="20" step="0.25" />
+          <input type="number" id="note-coef" placeholder="Coef" min="1" max="10" value="1" />
+          <button class="btn btn-icon" id="btn-add-note">+</button>
+        </div>
+        <input type="text" id="note-titre" placeholder="Titre (optionnel)" />
+      </div>
+    </div>
+    <h3 style="margin: 24px 0 12px; font-size: 16px;">Toutes mes notes</h3>
+    <div id="notes-list" class="list"></div>
+  </section>
+
+  <section id="page-dev">
+    <h2>Devoirs <span class="badge gold">Partagés</span></h2>
+    <p class="subtitle">📢 Visibles par toute la classe.</p>
+    <div class="card">
+      <h3>➕ Ajouter un devoir</h3>
+      <div class="form-grid">
+        <input type="text" id="dev-titre" placeholder="Titre" />
+        <div class="form-row cols-2">
+          <input type="text" id="dev-mat" placeholder="Matière" />
+          <input type="date" id="dev-date" />
+        </div>
+        <button class="btn btn-full" id="btn-add-dev">Ajouter</button>
+      </div>
+    </div>
+    <h3 style="margin: 24px 0 12px; font-size: 16px;">À faire</h3>
+    <div id="dev-list-todo" class="list"></div>
+    <h3 style="margin: 24px 0 12px; font-size: 16px;">Terminés</h3>
+    <div id="dev-list-done" class="list"></div>
+  </section>
+
+  <section id="page-edt">
+    <h2>Emploi du temps <span class="badge gold">Partagé</span></h2>
+    <p class="subtitle">📢 Pour toute la classe.</p>
+    <div class="card">
+      <h3>➕ Ajouter un cours</h3>
+      <div class="form-grid">
+        <input type="text" id="edt-mat" placeholder="Matière" />
+        <div class="form-row cols-2">
+          <select id="edt-jour">
+            <option value="0">Lundi</option><option value="1">Mardi</option><option value="2">Mercredi</option><option value="3">Jeudi</option><option value="4">Vendredi</option><option value="5">Samedi</option>
+          </select>
+          <select id="edt-creneau">
+            <option>8h</option><option>9h</option><option>10h</option><option>11h</option><option>13h</option><option>14h</option><option>15h</option><option>16h</option><option>17h</option>
+          </select>
+        </div>
+        <input type="text" id="edt-salle" placeholder="Salle (optionnel)" />
+        <button class="btn btn-full" id="btn-add-edt">Ajouter</button>
+      </div>
+    </div>
+    <div class="card" style="overflow-x: auto;">
+      <h3>📅 Semaine</h3>
+      <table class="edt-table">
+        <thead><tr><th></th><th>Lun</th><th>Mar</th><th>Mer</th><th>Jeu</th><th>Ven</th><th>Sam</th></tr></thead>
+        <tbody id="edt-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="page-infos">
+    <h2>Annonces 📢</h2>
+    <p class="subtitle">Infos publiées par l'admin.</p>
+    <div id="infos-list" class="list"></div>
+  </section>
+
+  <section id="page-polls">
+    <h2>Sondages 📊</h2>
+    <p class="subtitle">Donne ton avis.</p>
+    <div id="polls-list" class="list"></div>
+  </section>
+
+  <section id="page-req">
+    <h2>Envoyer une requête 📮</h2>
+    <p class="subtitle">Pose une question ou signale à l'admin.</p>
+    <div class="card">
+      <h3>➕ Nouvelle requête</h3>
+      <div class="form-grid">
+        <select id="req-type"><option value="question">❓ Question</option><option value="suggestion">💡 Suggestion</option><option value="signalement">⚠️ Signalement</option><option value="autre">📝 Autre</option></select>
+        <input type="text" id="req-titre" placeholder="Titre" />
+        <textarea id="req-msg" placeholder="Détaille ta demande..."></textarea>
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px;"><input type="checkbox" id="req-anonyme" style="width:auto;" />Envoyer anonymement</label>
+        <button class="btn btn-full" id="btn-send-req">Envoyer</button>
+      </div>
+    </div>
+    <h3 style="margin: 24px 0 12px; font-size: 16px;">Mes requêtes</h3>
+    <div id="my-requests" class="list"></div>
+  </section>
+
+  <section id="page-admin">
+    <h2>Administration <span class="admin-badge">ADMIN</span></h2>
+    <p class="subtitle">🔧 Tu vois tout, sauf les notes privées des élèves.</p>
+    <div class="stats">
+      <div class="stat admin"><div class="stat-label">Comptes</div><div class="stat-value" id="adm-users">0</div></div>
+      <div class="stat admin"><div class="stat-label">Classes</div><div class="stat-value" id="adm-classes">0</div></div>
+      <div class="stat admin"><div class="stat-label">Requêtes</div><div class="stat-value" id="adm-req">0</div></div>
+    </div>
+    <div class="card"><h3>📮 Requêtes reçues</h3><div id="admin-requests-list" class="list"></div></div>
+    <div class="card">
+      <h3>📢 Publier une annonce</h3>
+      <div class="form-grid">
+        <input type="text" id="ann-titre" placeholder="Titre" />
+        <textarea id="ann-msg" placeholder="Contenu..."></textarea>
+        <select id="ann-type"><option value="info">📘 Info</option><option value="urgent">🚨 Urgent</option><option value="event">🎉 Événement</option></select>
+        <button class="btn btn-full" id="btn-publish-ann">Publier</button>
+      </div>
+      <h4 style="font-size:13px; color:#94a3b8; margin: 16px 0 8px;">Publiées</h4>
+      <div id="admin-announces" class="list"></div>
+    </div>
+    <div class="card">
+      <h3>📊 Créer un sondage</h3>
+      <div class="form-grid">
+        <input type="text" id="poll-q" placeholder="Question" />
+        <div id="poll-options-inputs">
+          <input type="text" class="poll-opt-inp" placeholder="Option 1" style="margin-bottom:6px;" />
+          <input type="text" class="poll-opt-inp" placeholder="Option 2" style="margin-bottom:6px;" />
+        </div>
+        <button class="btn btn-secondary btn-small" id="btn-add-poll-opt">+ Option</button>
+        <button class="btn btn-full" id="btn-create-poll">Créer</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>🏫 Gérer les classes</h3>
+      <div class="form-grid" style="margin-bottom: 12px;">
+        <input type="text" id="new-class-name" placeholder="Nom (ex: 502)" />
+        <input type="text" id="new-class-code" placeholder="Code d'invitation (ex: 67)" />
+        <button class="btn btn-full" id="btn-create-class">Créer</button>
+      </div>
+      <div id="classes-list" class="list"></div>
+    </div>
+    <div class="card"><h3>👥 Comptes</h3><div id="users-list" class="list"></div></div>
+  </section>
+
+  <section id="page-settings">
+    <h2>Réglages</h2>
+    <p class="subtitle">Profil et compte.</p>
+    <div class="card">
+      <h3>👤 Mon profil</h3>
+      <div class="form-grid">
+        <input type="text" id="set-name" placeholder="Prénom" />
+        <select id="set-class"></select>
+        <input type="text" id="set-invite" placeholder="Rejoindre une classe par code (optionnel)" />
+        <button class="btn btn-full" id="btn-save-profile">Enregistrer</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>🔒 Statut admin</h3>
+      <p class="small" id="admin-status">Tu es élève.</p>
+      <p class="small" style="margin-top:8px;">Pour devenir admin la 1ère fois : Supabase → Table Editor → table <code>profiles</code> → édite ta ligne → <code>role</code> = <code>superadmin</code> → Save.</p>
+    </div>
+    <div class="danger-zone">
+      <h4>⚠️ Supprimer mon compte</h4>
+      <button class="btn btn-danger btn-full" id="btn-delete-account">Supprimer mon compte</button>
+    </div>
+    <p class="small" style="text-align: center; margin-top: 32px;">Mon École v4.0 · Supabase</p>
+  </section>
+</div>
+
+<nav id="nav-bar" style="display:none;">
+  <div class="nav-inner">
+    <button class="nav-btn active" data-page="home"><span class="icon">🏠</span><span>Accueil</span></button>
+    <button class="nav-btn" data-page="notes"><span class="icon">📊</span><span>Notes</span></button>
+    <button class="nav-btn" data-page="dev"><span class="icon">📝</span><span>Devoirs</span></button>
+    <button class="nav-btn" data-page="edt"><span class="icon">📅</span><span>EDT</span></button>
+    <button class="nav-btn" data-page="infos"><span class="icon">📢</span><span>Infos</span></button>
+    <button class="nav-btn" data-page="req"><span class="icon">📮</span><span>Requêtes</span></button>
+    <button class="nav-btn admin-only" data-page="admin"><span class="icon">🔧</span><span>Admin</span></button>
+  </div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL = 'https://vymftwtoifyjlmnwontl.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_pccJSQsu0gGHCdUtk_NjQQ_SPJGm6xW';
+
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+const CRENEAUX = ['8h','9h','10h','11h','13h','14h','15h','16h','17h'];
+
+let currentUser = null;
+let currentProfile = null;
+let currentClass = null;
+let cache = { classes: [], announces: [], polls: [], devoirs: [], edt: [], notes: [], requests: [], devoirs_done: [], poll_votes: [], users: [] };
+
+const $ = id => document.getElementById(id);
+const escapeHtml = s => s==null ? '' : String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const gradeClass = v => v>=14 ? 'grade-good' : v>=10 ? 'grade-ok' : 'grade-bad';
+const fmtDate = d => { if(!d) return ''; try { return new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}); } catch(e) { return d; } };
+const fmtDateTime = d => { if(!d) return ''; try { return new Date(d).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}); } catch(e) { return d; } };
+const joursRestants = d => { if(!d) return null; const n=new Date(); n.setHours(0,0,0,0); const t=new Date(d); t.setHours(0,0,0,0); return Math.round((t-n)/86400000); };
+
+function toast(msg, type='') {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function isAdmin() {
+  return currentProfile && (currentProfile.role === 'admin' || currentProfile.role === 'superadmin');
+}
+
+document.querySelectorAll('.auth-tab').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.auth-tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.auth-tab-content').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    $('auth-' + b.dataset.tab).classList.add('active');
+  });
+});
+
+$('btn-signup').addEventListener('click', async () => {
+  const name = $('signup-name').value.trim();
+  const email = $('signup-email').value.trim();
+  const pwd = $('signup-pwd').value;
+  const invite = $('signup-invite').value.trim().toUpperCase();
+  if (!name || !email || pwd.length < 6) return toast('Remplis tous les champs (mdp 6 car. min)', 'error');
+
+  $('btn-signup').disabled = true;
+  const { data, error } = await sb.auth.signUp({ email, password: pwd });
+  if (error) { $('btn-signup').disabled = false; return toast(error.message, 'error'); }
+
+  let classId = null;
+  if (invite) {
+    const { data: cls } = await sb.from('classes').select('id').eq('invite_code', invite).maybeSingle();
+    if (cls) classId = cls.id;
+    else toast('Code invalide, compte créé sans classe', 'error');
+  }
+
+  const userId = data.user.id;
+  const ident = (email.split('@')[0] + '_' + userId.slice(0, 4)).toLowerCase();
+  const { error: pErr } = await sb.from('profiles').insert({ id: userId, identifiant: ident, name, class_id: classId });
+  if (pErr) { $('btn-signup').disabled = false; return toast('Erreur profil : ' + pErr.message, 'error'); }
+
+  toast('✅ Compte créé !', 'success');
+  setTimeout(() => location.reload(), 1200);
+});
+
+$('btn-login').addEventListener('click', async () => {
+  const email = $('login-email').value.trim();
+  const pwd = $('login-pwd').value;
+  if (!email || !pwd) return toast('Remplis tous les champs', 'error');
+  $('btn-login').disabled = true;
+  const { error } = await sb.auth.signInWithPassword({ email, password: pwd });
+  if (error) { $('btn-login').disabled = false; return toast(error.message, 'error'); }
+  await loadSession();
+});
+
+window.logout = async function() {
+  if (!confirm('Se déconnecter ?')) return;
+  await sb.auth.signOut();
+  location.reload();
+};
+
+async function loadSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return false;
+  currentUser = session.user;
+  const { data: profile, error } = await sb.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+  if (error || !profile) { toast('Erreur chargement profil', 'error'); return false; }
+  currentProfile = profile;
+  if (profile.class_id) {
+    const { data: cls } = await sb.from('classes').select('*').eq('id', profile.class_id).maybeSingle();
+    currentClass = cls;
+  }
+  enterApp();
+  return true;
+}
+
+function enterApp() {
+  $('auth-screen').classList.remove('show');
+  $('main-app').style.display = '';
+  $('nav-bar').style.display = '';
+  $('float-btns').style.display = '';
+  if (isAdmin()) document.body.classList.add('is-admin');
+  loadAllData();
+}
+
+window.showPage = function(page) {
+  if (page === 'admin' && !isAdmin()) { toast('Accès réservé admin', 'error'); return; }
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  $('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+  window.scrollTo(0, 0);
+};
+document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => showPage(b.dataset.page)));
+
+async function loadAllData() {
+  const [classes, announces, polls, devoirs, edt, notes, requests, dd, pv, users] = await Promise.all([
+    sb.from('classes').select('*'),
+    sb.from('announces').select('*').order('created_at', { ascending: false }),
+    sb.from('polls').select('*').order('created_at', { ascending: false }),
+    sb.from('devoirs').select('*'),
+    sb.from('edt').select('*'),
+    sb.from('notes').select('*'),
+    sb.from('requests').select('*').order('created_at', { ascending: false }),
+    sb.from('devoirs_done').select('*'),
+    sb.from('poll_votes').select('*'),
+    sb.from('profiles').select('*')
+  ]);
+  cache.classes = classes.data || [];
+  cache.announces = announces.data || [];
+  cache.polls = polls.data || [];
+  cache.devoirs = devoirs.data || [];
+  cache.edt = edt.data || [];
+  cache.notes = notes.data || [];
+  cache.requests = requests.data || [];
+  cache.devoirs_done = dd.data || [];
+  cache.poll_votes = pv.data || [];
+  cache.users = users.data || [];
+  renderAll();
+}
+
+function renderAll() {
+  renderHeader();
+  renderNotes();
+  renderDev();
+  renderEdt();
+  renderInfos();
+  renderPolls();
+  renderRequests();
+  renderHome();
+  renderSettings();
+  if (isAdmin()) renderAdmin();
+}
+
+function renderHeader() {
+  $('user-name').firstChild.nodeValue = currentProfile.name;
+  $('admin-tag').innerHTML = isAdmin() ? '<span class="admin-badge">ADMIN</span>' : '';
+  $('user-class').textContent = currentClass ? currentClass.name : 'Sans classe';
+  $('greeting-name').textContent = currentProfile.name + ' 👋';
+}
+
+function renderSettings() {
+  $('set-name').value = currentProfile.name;
+  $('set-class').innerHTML = '<option value="">— Aucune —</option>' + cache.classes.map(c => `<option value="${c.id}" ${c.id===currentProfile.class_id?'selected':''}>${escapeHtml(c.name)}</option>`).join('');
+  $('admin-status').textContent = isAdmin() ? '✅ Tu es ' + currentProfile.role + '.' : 'Tu es élève.';
+}
+
+$('btn-add-note').addEventListener('click', async () => {
+  const mat = $('note-mat').value.trim();
+  const val = parseFloat($('note-val').value);
+  const coef = parseInt($('note-coef').value) || 1;
+  const titre = $('note-titre').value.trim();
+  if (!mat || isNaN(val) || val < 0 || val > 20) return toast('Données invalides', 'error');
+  const { data, error } = await sb.from('notes').insert({ user_id: currentUser.id, matiere: mat, valeur: val, coef, titre: titre || null }).select().single();
+  if (error) return toast(error.message, 'error');
+  cache.notes.push(data);
+  $('note-mat').value = ''; $('note-val').value = ''; $('note-coef').value = '1'; $('note-titre').value = '';
+  renderNotes(); renderHome();
+  toast('Note ajoutée ✅', 'success');
+});
+
+window.deleteNote = async function(id) {
+  if (!confirm('Supprimer ?')) return;
+  const { error } = await sb.from('notes').delete().eq('id', id);
+  if (error) return toast(error.message, 'error');
+  cache.notes = cache.notes.filter(n => n.id !== id);
+  renderNotes(); renderHome();
+};
+
+function renderNotes() {
+  const arr = cache.notes;
+  let mg = null;
+  if (arr.length) { const tp = arr.reduce((s,n) => s + n.valeur*n.coef, 0); const tc = arr.reduce((s,n) => s + n.coef, 0); mg = tp/tc; }
+  $('notes-moy').textContent = mg !== null ? mg.toFixed(2) : '—';
+  $('notes-nb').textContent = arr.length + (arr.length > 1 ? ' notes' : ' note');
+  const list = $('notes-list');
+  if (!arr.length) { list.innerHTML = '<div class="empty"><span class="empty-icon">📝</span>Ajoute ta première note</div>'; return; }
+  list.innerHTML = [...arr].sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(n => `<div class="item"><div class="item-main"><div class="item-title">${escapeHtml(n.matiere)}${n.titre?' — '+escapeHtml(n.titre):''}</div><div class="item-meta"><span>Coef ${n.coef}</span><span>${fmtDate(n.created_at)}</span></div></div><div class="grade-pill ${gradeClass(n.valeur)}">${n.valeur}</div><button class="icon-btn" onclick="deleteNote('${n.id}')">🗑</button></div>`).join('');
+}
+
+$('btn-add-dev').addEventListener('click', async () => {
+  if (!currentProfile.class_id) return toast('Rejoins une classe d\'abord', 'error');
+  const titre = $('dev-titre').value.trim();
+  const mat = $('dev-mat').value.trim();
+  const date = $('dev-date').value || null;
+  if (!titre) return toast('Titre requis', 'error');
+  const { data, error } = await sb.from('devoirs').insert({ class_id: currentProfile.class_id, titre, matiere: mat || null, date_pour: date, created_by: currentUser.id }).select().single();
+  if (error) return toast(error.message, 'error');
+  cache.devoirs.push(data);
+  $('dev-titre').value = ''; $('dev-mat').value = ''; $('dev-date').value = '';
+  renderDev(); renderHome();
+  toast('Devoir ajouté ✅', 'success');
+});
+
+window.toggleDev = async function(id) {
+  const done = cache.devoirs_done.find(d => d.devoir_id === id && d.user_id === currentUser.id);
+  if (done) {
+    await sb.from('devoirs_done').delete().eq('devoir_id', id).eq('user_id', currentUser.id);
+    cache.devoirs_done = cache.devoirs_done.filter(d => !(d.devoir_id === id && d.user_id === currentUser.id));
+  } else {
+    const { data, error } = await sb.from('devoirs_done').insert({ devoir_id: id, user_id: currentUser.id }).select().single();
+    if (error) return toast(error.message, 'error');
+    cache.devoirs_done.push(data);
+  }
+  renderDev(); renderHome();
+};
+
+window.deleteDev = async function(id) {
+  if (!confirm('Supprimer pour toute la classe ?')) return;
+  const { error } = await sb.from('devoirs').delete().eq('id', id);
+  if (error) return toast(error.message, 'error');
+  cache.devoirs = cache.devoirs.filter(d => d.id !== id);
+  renderDev(); renderHome();
+};
+
+const isDoneByMe = devId => cache.devoirs_done.some(d => d.devoir_id === devId && d.user_id === currentUser.id);
+
+function renderDev() {
+  const arr = cache.devoirs.filter(d => d.class_id === currentProfile.class_id);
+  const todo = arr.filter(d => !isDoneByMe(d.id)).sort((a,b) => (a.date_pour||'9') > (b.date_pour||'9') ? 1 : -1);
+  const done = arr.filter(d => isDoneByMe(d.id));
+  const renderItem = d => {
+    const jr = joursRestants(d.date_pour); const fait = isDoneByMe(d.id);
+    let b = '';
+    if (jr !== null && !fait) {
+      if (jr < 0) b = '<span class="badge red">En retard</span>';
+      else if (jr === 0) b = '<span class="badge red">Aujourd\'hui</span>';
+      else if (jr === 1) b = '<span class="badge amber">Demain</span>';
+      else if (jr <= 3) b = '<span class="badge amber">Dans '+jr+'j</span>';
+      else b = '<span class="badge">Dans '+jr+'j</span>';
+    }
+    const auteur = cache.users.find(u => u.id === d.created_by);
+    return `<div class="item ${fait?'done':''}"><button class="checkbox ${fait?'checked':''}" onclick="toggleDev('${d.id}')"></button><div class="item-main"><div class="item-title">${escapeHtml(d.titre)}</div><div class="item-meta">${d.matiere?'<span>'+escapeHtml(d.matiere)+'</span>':''}${d.date_pour?'<span>📅 '+fmtDate(d.date_pour)+'</span>':''}${auteur?'<span>par '+escapeHtml(auteur.name)+'</span>':''}${b}</div></div><button class="icon-btn" onclick="deleteDev('${d.id}')">🗑</button></div>`;
+  };
+  $('dev-list-todo').innerHTML = todo.length ? todo.map(renderItem).join('') : '<div class="empty"><span class="empty-icon">🎉</span>Aucun devoir</div>';
+  $('dev-list-done').innerHTML = done.length ? done.map(renderItem).join('') : '<div class="empty" style="padding:20px;">Aucun terminé</div>';
+}
+
+$('btn-add-edt').addEventListener('click', async () => {
+  if (!currentProfile.class_id) return toast('Rejoins une classe d\'abord', 'error');
+  const mat = $('edt-mat').value.trim();
+  const jour = parseInt($('edt-jour').value);
+  const creneau = $('edt-creneau').value;
+  const salle = $('edt-salle').value.trim();
+  if (!mat) return toast('Matière requise', 'error');
+  await sb.from('edt').delete().eq('class_id', currentProfile.class_id).eq('jour', jour).eq('creneau', creneau);
+  cache.edt = cache.edt.filter(e => !(e.class_id === currentProfile.class_id && e.jour === jour && e.creneau === creneau));
+  const { data, error } = await sb.from('edt').insert({ class_id: currentProfile.class_id, matiere: mat, jour, creneau, salle: salle || null }).select().single();
+  if (error) return toast(error.message, 'error');
+  cache.edt.push(data);
+  $('edt-mat').value = ''; $('edt-salle').value = '';
+  renderEdt(); renderHome();
+  toast('Cours ajouté ✅', 'success');
+});
+
+window.deleteEdtCell = async function(id) {
+  if (!confirm('Supprimer ce cours ?')) return;
+  const { error } = await sb.from('edt').delete().eq('id', id);
+  if (error) return toast(error.message, 'error');
+  cache.edt = cache.edt.filter(e => e.id !== id);
+  renderEdt(); renderHome();
+};
+
+function renderEdt() {
+  const arr = cache.edt.filter(e => e.class_id === currentProfile.class_id);
+  $('edt-body').innerHTML = CRENEAUX.map(cr => {
+    let r = `<tr><td class="edt-time">${cr}</td>`;
+    for (let j = 0; j < 6; j++) {
+      const c = arr.find(x => x.jour === j && x.creneau === cr);
+      r += c ? `<td class="has-class" onclick="deleteEdtCell('${c.id}')">${escapeHtml(c.matiere)}${c.salle?'<small>'+escapeHtml(c.salle)+'</small>':''}</td>` : '<td></td>';
+    }
+    return r + '</tr>';
+  }).join('');
+}
+
+function renderInfos() {
+  const list = $('infos-list');
+  if (!cache.announces.length) { list.innerHTML = '<div class="empty"><span class="empty-icon">📢</span>Aucune annonce</div>'; return; }
+  list.innerHTML = cache.announces.map(a => {
+    const ty = a.type === 'urgent' ? '<span class="badge red">🚨 Urgent</span>' : a.type === 'event' ? '<span class="badge green">🎉 Événement</span>' : '<span class="badge">📘 Info</span>';
+    return `<div class="item" style="flex-direction:column; align-items:stretch; gap:6px;"><div><div class="item-title">${escapeHtml(a.titre)}</div><div class="item-meta">${ty}<span>${fmtDateTime(a.created_at)}</span></div></div><div class="item-body">${escapeHtml(a.msg)}</div></div>`;
+  }).join('');
+}
+
+window.votePoll = async function(pId, oIdx) {
+  await sb.from('poll_votes').delete().eq('poll_id', pId).eq('user_id', currentUser.id);
+  const { data, error } = await sb.from('poll_votes').insert({ poll_id: pId, user_id: currentUser.id, option_index: oIdx }).select().single();
+  if (error) return toast(error.message, 'error');
+  cache.poll_votes = cache.poll_votes.filter(v => !(v.poll_id === pId && v.user_id === currentUser.id));
+  cache.poll_votes.push(data);
+  renderPolls();
+};
+
+function renderPolls() {
+  const list = $('polls-list');
+  if (!cache.polls.length) { list.innerHTML = '<div class="empty"><span class="empty-icon">📊</span>Aucun sondage</div>'; return; }
+  list.innerHTML = cache.polls.map(p => {
+    const votes = cache.poll_votes.filter(v => v.poll_id === p.id);
+    const total = votes.length;
+    const myVote = votes.find(v => v.user_id === currentUser.id);
+    const opts = (p.options || []).map((opt, i) => {
+      const count = votes.filter(v => v.option_index === i).length;
+      const pct = total ? Math.round(count * 100 / total) : 0;
+      const voted = myVote && myVote.option_index === i;
+      return `<div class="poll-option ${voted?'voted':''}" onclick="votePoll('${p.id}', ${i})"><div class="poll-bar" style="width:${pct}%;"></div><div class="poll-text">${escapeHtml(opt)} ${voted?'✓':''}</div><div class="poll-stats">${pct}% (${count})</div></div>`;
+    }).join('');
+    return `<div class="card"><h3>${escapeHtml(p.question)}</h3>${opts}<p class="small" style="margin-top:8px;">${total} vote${total>1?'s':''}</p></div>`;
+  }).join('');
+}
+
+$('btn-send-req').addEventListener('click', async () => {
+  const type = $('req-type').value;
+  const titre = $('req-titre').value.trim();
+  const msg = $('req-msg').value.trim();
+  const anonyme = $('req-anonyme').checked;
+  if (!titre || !msg) return toast('Titre et message requis', 'error');
+  const { data, error } = await sb.from('requests').insert({ user_id: currentUser.id, anonyme, type, titre, msg }).select().single();
+  if (error) return toast(error.message, 'error');
+  cache.requests.unshift(data);
+  $('req-titre').value = ''; $('req-msg').value = ''; $('req-anonyme').checked = false;
+  renderRequests();
+  toast('Requête envoyée ✅', 'success');
+});
+
+window.deleteRequest = async function(id) {
+  if (!confirm('Supprimer ?')) return;
+  const { error } = await sb.from('requests').delete().eq('id', id);
+  if (error) return toast(error.message, 'error');
+  cache.requests = cache.requests.filter(r => r.id !== id);
+  renderRequests();
+  if (isAdmin()) renderAdmin();
+};
+
+function renderRequests() {
+  const mine = cache.requests.filter(r => r.user_id === currentUser.id);
+  const list = $('my-requests');
+  if (!mine.length) { list.innerHTML = '<div class="empty"><span class="empty-icon">📮</span>Aucune requête</div>'; return; }
+  list.innerHTML = mine.map(r => {
+    const st = r.status === 'pending' ? '<span class="badge amber">En attente</span>' : r.status === 'replied' ? '<span class="badge green">Répondu</span>' : '<span class="badge">Fermé</span>';
+    return `<div class="item" style="flex-direction:column; align-items:stretch;"><div style="display:flex; justify-content:space-between;"><div><div class="item-title">${escapeHtml(r.titre)}</div><div class="item-meta"><span>${r.type}</span>${st}</div></div><button class="icon-btn" onclick="deleteRequest('${r.id}')">🗑</button></div><div class="item-body">${escapeHtml(r.msg)}</div>${r.reply ? '<div class="item-body" style="background:rgba(34,197,94,0.08); padding:10px; border-radius:8px;"><strong style="color:#86efac;">Réponse :</strong><br>'+escapeHtml(r.reply)+'</div>' : ''}</div>`;
+  }).join('');
+}
+
+function renderHome() {
+  const arr = cache.notes;
+  let mg = null;
+  if (arr.length) { const tp = arr.reduce((s,n) => s + n.valeur*n.coef, 0); const tc = arr.reduce((s,n) => s + n.coef, 0); mg = tp/tc; }
+  $('home-moy').textContent = mg !== null ? mg.toFixed(2) : '—';
+  $('home-moy-sub').textContent = arr.length ? arr.length + ' note' + (arr.length>1?'s':'') : 'aucune note';
+  const devClass = cache.devoirs.filter(d => d.class_id === currentProfile.class_id);
+  $('home-dev').textContent = devClass.filter(d => !isDoneByMe(d.id)).length;
+  const today = new Date(); let jIdx = today.getDay() - 1; if (jIdx < 0) jIdx = 6;
+  const cdj = cache.edt.filter(c => c.class_id === currentProfile.class_id && c.jour === jIdx).sort((a,b) => CRENEAUX.indexOf(a.creneau) - CRENEAUX.indexOf(b.creneau));
+  $('home-cours').textContent = cdj.length;
+  $('home-jour').textContent = JOURS[jIdx];
+  const recent = cache.announces.slice(0, 3);
+  $('home-announces').innerHTML = recent.length ? recent.map(a => `<div class="item"><div class="item-main"><div class="item-title">${escapeHtml(a.titre)}</div><div class="item-meta">${fmtDateTime(a.created_at)}</div></div></div>`).join('') : '<div class="empty" style="padding:20px;">Aucune annonce</div>';
+  const eToday = $('home-edt-today');
+  if (!currentProfile.class_id) eToday.innerHTML = '<div class="empty" style="padding:20px;">Aucune classe</div>';
+  else if (!cdj.length) eToday.innerHTML = '<div class="empty" style="padding:20px;">Pas de cours 🎉</div>';
+  else eToday.innerHTML = cdj.map(c => `<div class="item"><div class="grade-pill" style="background:rgba(139,92,246,0.2); color:#c4b5fd; min-width:50px;">${c.creneau}</div><div class="item-main"><div class="item-title">${escapeHtml(c.matiere)}</div>${c.salle?'<div class="item-meta">Salle '+escapeHtml(c.salle)+'</div>':''}</div></div>`).join('');
+  const proch = devClass.filter(d => !isDoneByMe(d.id)).sort((a,b) => (a.date_pour||'9')>(b.date_pour||'9')?1:-1).slice(0,4);
+  $('home-prochains').innerHTML = proch.length ? proch.map(d => `<div class="item"><div class="item-main"><div class="item-title">${escapeHtml(d.titre)}</div><div class="item-meta">${d.matiere?'<span>'+escapeHtml(d.matiere)+'</span>':''}${d.date_pour?'<span>📅 '+fmtDate(d.date_pour)+'</span>':''}</div></div></div>`).join('') : '<div class="empty" style="padding:20px;">Aucun devoir 🎉</div>';
+}
+
+$('btn-save-profile').addEventListener('click', async () => {
+  const name = $('set-name').value.trim();
+  let classId = $('set-class').value || null;
+  const invite = $('set-invite').value.trim().toUpperCase();
+  if (invite) {
+    const { data: cls } = await sb.from('classes').select('id').eq('invite_code', invite).maybeSingle();
+    if (!cls) return toast('Code invalide', 'error');
+    classId = cls.id;
+  }
+  const { error } = await sb.from('profiles').update({ name, class_id: classId }).eq('id', currentUser.id);
+  if (error) return toast(error.message, 'error');
+  currentProfile.name = name;
+  currentProfile.class_id = classId;
+  currentClass = cache.classes.find(c => c.id === classId);
+  $('set-invite').value = '';
+  await loadAllData();
+  toast('Profil enregistré ✅', 'success');
+});
+
+$('btn-delete-account').addEventListener('click', async () => {
+  if (!confirm('⚠️ Supprimer ton compte ?')) return;
+  if (!confirm('Toutes tes données seront perdues. Sûr ?')) return;
+  await sb.from('profiles').delete().eq('id', currentUser.id);
+  await sb.auth.signOut();
+  location.reload();
+});
+
+$('btn-create-class').addEventListener('click', async () => {
+  const name = $('new-class-name').value.trim();
+  const code = $('new-class-code').value.trim().toUpperCase();
+  if (!name) return toast('Nom requis', 'error');
+  const { data, error } = await sb.from('classes').insert({ name, invite_code: code || null }).select().single();
+  if (error) return toast(error.message, 'error');
+  cache.classes.push(data);
+  $('new-class-name').value = ''; $('new-class-code').value = '';
+  renderAdmin(); renderSettings();
+  toast('Classe créée ✅', 'success');
+});
+
+window.deleteClass = async function(id) {
+  if (!confirm('Supprimer cette classe ?')) return;
+  const { error } = await sb.from('classes').delete().eq('id', id);
+  if (error) return toast(error.message, 'error');
+  cache.classes = cache.classes.filter(c => c.id !== id);
+  renderAdmin(); renderSettings();
+};
+
+$('btn-publish-ann').addEventListener('click', async () => {
+  const titre = $('ann-titre').value.trim();
+  const msg = $('ann-msg').value.trim();
+  const type = $('ann-type').value;
+  if (!titre || !msg) return toast('Titre et message requis', 'error');
+  const { data, error } = await sb.from('announces').insert({ titre, msg, type, created_by: currentUser.id }).select().single();
+  if (error) return toast(error.message, 'error');
+  cache.announces.unshift(data);
+  $('ann-titre').value = ''; $('ann-msg').value = '';
+  renderAdmin(); renderInfos(); renderHome();
+  toast('Annonce publiée ✅', 'success');
+});
+
+window.deleteAnnounce = async function(id) {
+  if (!confirm('Supprimer ?')) return;
+  const { error } = await sb.from('announces').delete().eq('id', id);
+  if (error) return toast(error.message, 'error');
+  cache.announces = cache.announces.filter(a => a.id !== id);
+  renderAdmin(); renderInfos(); renderHome();
+};
+
+$('btn-add-poll-opt').addEventListener('click', () => {
+  const inp = document.createElement('input');
+  inp.type = 'text'; inp.className = 'poll-opt-inp'; inp.placeholder = 'Option';
+  inp.style.marginBottom = '6px';
+  $('poll-options-inputs').appendChild(inp);
+});
+
+$('btn-create-poll').addEventListener('click', async () => {
+  const q = $('poll-q').value.trim();
+  const opts = [...document.querySelectorAll('.poll-opt-inp')].map(i => i.value.trim()).filter(Boolean);
+  if (!q || opts.length < 2) return toast('Question + 2 options min', 'error');
+  const { data, error } = await sb.from('polls').insert({ question: q, options: opts, created_by: currentUser.id }).select().single();
+  if (error) return toast(error.message, 'error');
+  cache.polls.unshift(data);
+  $('poll-q').value = '';
+  $('poll-options-inputs').innerHTML = '<input type="text" class="poll-opt-inp" placeholder="Option 1" style="margin-bottom:6px;" /><input type="text" class="poll-opt-inp" placeholder="Option 2" style="margin-bottom:6px;" />';
+  renderAdmin(); renderPolls();
+  toast('Sondage créé ✅', 'success');
+});
+
+window.replyRequest = async function(id) {
+  const txt = prompt('Ta réponse :');
+  if (!txt) return;
+  const { error } = await sb.from('requests').update({ reply: txt, status: 'replied' }).eq('id', id);
+  if (error) return toast(error.message, 'error');
+  const r = cache.requests.find(x => x.id === id);
+  if (r) { r.reply = txt; r.status = 'replied'; }
+  renderAdmin(); renderRequests();
+  toast('Répondu ✅', 'success');
+};
+
+window.adminDeleteUser = async function(id) {
+  if (!confirm('Supprimer cet utilisateur ?')) return;
+  const { error } = await sb.from('profiles').delete().eq('id', id);
+  if (error) return toast(error.message, 'error');
+  cache.users = cache.users.filter(u => u.id !== id);
+  renderAdmin();
+};
+
+function renderAdmin() {
+  if (!isAdmin()) return;
+  $('adm-users').textContent = cache.users.length;
+  $('adm-classes').textContent = cache.classes.length;
+  $('adm-req').textContent = cache.requests.filter(r => r.status === 'pending').length;
+  const arl = $('admin-requests-list');
+  if (!cache.requests.length) arl.innerHTML = '<div class="empty" style="padding:20px;">Aucune requête</div>';
+  else arl.innerHTML = cache.requests.map(r => {
+    const u = cache.users.find(x => x.id === r.user_id);
+    const auteur = r.anonyme ? '🕶 Anonyme' : (u ? u.name : '?');
+    const st = r.status === 'pending' ? '<span class="badge amber">En attente</span>' : r.status === 'replied' ? '<span class="badge green">Répondu</span>' : '<span class="badge">Fermé</span>';
+    return `<div class="item" style="flex-direction:column; align-items:stretch;"><div><div class="item-title">${escapeHtml(r.titre)}</div><div class="item-meta"><span>${r.type}</span><span>${escapeHtml(auteur)}</span>${st}</div></div><div class="item-body">${escapeHtml(r.msg)}</div>${r.reply?'<div class="item-body" style="background:rgba(34,197,94,0.08); padding:10px; border-radius:8px;"><strong>Réponse :</strong> '+escapeHtml(r.reply)+'</div>':''}<div style="display:flex; gap:8px; margin-top:8px;">${r.status !== 'replied' ? '<button class="btn btn-small btn-success" onclick="replyRequest(\''+r.id+'\')">💬 Répondre</button>' : ''}<button class="btn btn-small btn-danger" onclick="deleteRequest(\''+r.id+'\')">🗑</button></div></div>`;
+  }).join('');
+  $('admin-announces').innerHTML = cache.announces.map(a => `<div class="item"><div class="item-main"><div class="item-title">${escapeHtml(a.titre)}</div><div class="item-meta">${a.type} · ${fmtDateTime(a.created_at)}</div></div><button class="icon-btn" onclick="deleteAnnounce('${a.id}')">🗑</button></div>`).join('') || '<div class="empty" style="padding:20px;">Aucune</div>';
+  $('classes-list').innerHTML = cache.classes.length ? cache.classes.map(c => {
+    const nu = cache.users.filter(u => u.class_id === c.id).length;
+    return `<div class="item"><div class="item-main"><div class="item-title">${escapeHtml(c.name)}</div><div class="item-meta"><span>${nu} membre${nu>1?'s':''}</span>${c.invite_code?'<span class="badge">Code: '+c.invite_code+'</span>':''}</div></div><button class="icon-btn" onclick="deleteClass('${c.id}')">🗑</button></div>`;
+  }).join('') : '<div class="empty" style="padding:20px;">Aucune classe</div>';
+  $('users-list').innerHTML = cache.users.map(u => {
+    const c = cache.classes.find(x => x.id === u.class_id);
+    const isMe = u.id === currentUser.id;
+    return `<div class="item"><div class="item-main"><div class="item-title">${escapeHtml(u.name)} ${isMe?'<span class="badge green">Moi</span>':''} ${u.role !== 'student' ? '<span class="admin-badge">'+u.role+'</span>' : ''}</div><div class="item-meta"><span>${escapeHtml(u.identifiant)}</span><span>${c ? escapeHtml(c.name) : 'Sans classe'}</span></div></div>${!isMe ? '<button class="icon-btn" onclick="adminDeleteUser(\''+u.id+'\')">🗑</button>' : ''}</div>`;
+  }).join('');
+}
+
+(async () => {
+  const ok = await loadSession();
+  if (!ok) $('auth-screen').classList.add('show');
+})();
+</script>
+</body>
+</html>
